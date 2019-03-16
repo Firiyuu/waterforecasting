@@ -1,10 +1,13 @@
 import pandas as pd
 import time
 import datetime
-from imptation import imputation #Recieves MATRIX string 
+from imptation import imputation_mean, imputation_k #Recieves MATRIX string 
+from normalization import normalization, transform
+from feature_selection import feature_selection
 import csv
 import pprint
-
+import numpy as np
+import math
 
 
 def time_to_value(value):
@@ -98,7 +101,6 @@ for i in range(0, len(rows_list)):
 
 
 
-matrix_final = []
 for index in indeces:
 
 	pre = int(index)-1
@@ -107,27 +109,47 @@ for index in indeces:
 		all_rows[int(index)], all_rows[pre] = all_rows[pre], all_rows[int(index)]
 		print "After: " + str(all_rows[int(index)]) + '-' + str(all_rows[int(index)-1])
 
-		matrix_tempo[int(index)], matrix_tempo[pre] = matrix_tempo[pre], matrix_tempo[int(index)]
 
 	except Exception as e:
 		print str(e)
 		break
 
 
-
-matrix = []
+matrice  = []
 with open('nan.csv', 'w') as f:
 	for i in range(0, len(all_rows)):
            string = str(all_rows[i])
-           matrix.append(all_rows[i])
+
+           row_ = all_rows[i].split(',')
+
+           try:
+              first_  = int(row_[0])
+              next_  = float(row_[-1])
+           except:
+           	  row1 = float('NaN')
+           	  row2 = float('NaN')
+           	  first_ = row1
+           	  next_ = row2
+
+           matrice.append([first_,next_])
            f.write(string + '\n')
 
 
-print str(matrix)
-time.sleep(5)
-imputation(matrix_final)
+
+df = pd.DataFrame(matrice, columns=['TIME', 'WATERLEVEL'])
+print str(df)
+
+matrix_final = np.array(df)
+matrix_imputed = imputation_mean(matrix_final)
+#imputation_k(matrix_final)
+matrix_normalized = normalization(matrix_imputed)
+
+matrix_transformed = transform(matrix_normalized)
+
+feature_selection = feature_selection(matrix_transformed)
 
 
+print "Data preparation completed"
 # print "Accepted values: " + str(len(accepted))
 # print "Rejected values: " + str(len(rejected))
 # print "Odd values: " + str(len(odd))
