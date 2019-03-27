@@ -67,19 +67,29 @@ for i in range(0, len(df_list)):       # iterate through all indices
 
     in_between = value_x - value_pre
 
+    #TODO Post-Pre/10 = n-rows to be imputed within to put 'NaN'
+    n_rows = in_between/600
+
     if (len(str(value_pre)) == 2 and len(str(value_x)) == 5) or (len(str(value_x)) == 2 and len(str(value_pre)) == 5):
         continue
-    else:
+    else:  
+
+
+
+
+
  
-        if in_between <= 700 and in_between >= 500:
-          accepted.append({value_pre, value_x})
+        if in_between == 600:
+          accepted.append({value_pre, value_x}) 
         elif in_between < 0:
           odd.append({value_pre, value_x, in_between})
         else:
           rejected.append({value_pre, value_x, i, i-1})
-          #Declare blanks as NaN
-          rows_list.append('NaN')
-          rows_list_wl.append('NaN')
+          #Declare blanks as NaN -- Toinclude n_rows
+
+          for i in n_rows:
+            rows_list.append('NaN')
+            rows_list_wl.append('NaN')
 
 
 
@@ -141,12 +151,17 @@ print str(df)
 
 matrix_final = np.array(df)
 matrix_imputed = imputation_mean(matrix_final)
+
+
+
 #imputation_k(matrix_final)
-matrix_normalized = normalization(matrix_imputed)
 
-matrix_transformed = transform(matrix_normalized)
 
-feature_selection = feature_selection(matrix_transformed)
+# matrix_normalized = normalization(matrix_imputed)
+
+# matrix_transformed = transform(matrix_normalized)
+
+# feature_selection = feature_selection(matrix_transformed)
 
 
 print "Data preparation completed"
