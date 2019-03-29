@@ -10,6 +10,11 @@ import numpy as np
 import math
 
 
+# def define_time(array_):
+
+
+
+
 def time_to_value(value):
   timestr = value
   ftr = [3600,60,1]
@@ -86,10 +91,11 @@ for i in range(0, len(df_list)):       # iterate through all indices
         else:
           rejected.append({value_pre, value_x, i, i-1})
           #Declare blanks as NaN -- Toinclude n_rows
-
-          for i in n_rows:
-            rows_list.append('NaN')
-            rows_list_wl.append('NaN')
+          
+          for i in range(int(n_rows)-1):
+             value_pre += 600
+             rows_list.append(value_pre)
+             rows_list_wl.append('NaN')
 
 
 
@@ -97,12 +103,24 @@ all_rows = []
 matrix_tempo = []
 
 for i in range(0, len(rows_list)):
-    if rows_list[i] == 'NaN' and rows_list_wl[i]=='NaN':
+    if rows_list_wl[i]=='NaN':
        indeces.append(str(i))
     
     try:
-        string = str(time_to_value(str(rows_list[i]))) + ',' + str(rows_list_wl[i])
-        all_rows.append(string)
+
+
+        condition_ = isinstance(rows_list[i], int)
+
+        if condition_:
+          string = str(str(rows_list[i])) + ',' + str(rows_list_wl[i])
+          all_rows.append(string)
+
+
+        else:
+          string = str(time_to_value(str(rows_list[i]))) + ',' + str(rows_list_wl[i])
+          all_rows.append(string)
+
+    
     except Exception as e:
         string = (str(rows_list[i])) + ',' + str(rows_list_wl[i])
         matrix_tempo.append([rows_list[i],float(rows_list_wl[i])])
@@ -115,9 +133,9 @@ for index in indeces:
 
 	pre = int(index)-1
 	try:
-		print "Before: " + str(all_rows[int(index)]) + '-' + str(all_rows[int(index)-1])
+		#print "Before: " + str(all_rows[int(index)]) + '-' + str(all_rows[int(index)-1])
 		all_rows[int(index)], all_rows[pre] = all_rows[pre], all_rows[int(index)]
-		print "After: " + str(all_rows[int(index)]) + '-' + str(all_rows[int(index)-1])
+		#print "After: " + str(all_rows[int(index)]) + '-' + str(all_rows[int(index)-1])
 
 
 	except Exception as e:
@@ -147,10 +165,33 @@ with open('nan.csv', 'w') as f:
 
 
 df = pd.DataFrame(matrice, columns=['TIME', 'WATERLEVEL'])
-print str(df)
+
 
 matrix_final = np.array(df)
 matrix_imputed = imputation_mean(matrix_final)
+
+df = pd.DataFrame(matrice, columns=['TIME', 'WATERLEVEL'])
+
+time_list = df['TIME'].tolist()
+
+# new_list = []
+# for i in range(0, len(time_list)):
+#     if math.isnan(time_list[i]):
+#        time_ = time_list[i-1] + 600
+#        time_list[i] = time_
+#        new_list.append(time_list[i])
+#     else:
+#        new_list.append(time_list[i])
+
+
+
+# print "After imputation: " + str(len(new_list))
+
+# df = pd.DataFrame(matrix_imputed, columns=['TIME', 'WATERLEVEL'])
+# list_new = list(dict.fromkeys(new_list))
+# df["TIME"] =  list_new
+# df.to_csv(r'imputed_merged.csv')
+# print(str(new_list))
 
 
 
