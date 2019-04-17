@@ -8,7 +8,7 @@ import csv
 import pprint
 import numpy as np
 import math
-
+from knn import impute_knn
 
 # def define_time(array_):
 
@@ -20,6 +20,82 @@ def time_to_value(value):
   ftr = [3600,60,1]
   converted = sum([a*b for a,b in zip(ftr, map(int,timestr.split(':')))])
   return converted
+
+
+def grouped_range(list_):
+  group_of_groups = []
+  group = []
+  begin = []
+  after = []
+
+
+  for i in range(len(all_rows)):
+      string = str(all_rows[i])
+
+      row_ = all_rows[i].split(',')
+
+      try:
+        row_after = all_rows[i+1].split(',')
+      except Exception as e:
+        print str(e)
+
+      first_  = int(row_[0])
+      first_after = int(row_after[0])
+      next_  = row_[-1]
+
+      if first_after > first_:
+        if row_[1] == '':
+           row_[1] = ''
+           group.append(row_)
+        else:
+           row_[1] = float(row_[1])
+           group.append(row_)
+      else:
+
+        #GET ORIGIN
+        origin = group[0]
+        origin = int(origin[0])
+
+        if origin != 0:
+           distance = origin/600
+           for i in range(distance):
+             row_ = [600*i, '']
+             begin.append(row_)
+
+
+        #GET LAST
+        last = group[len(group)-1]
+        last = int(last[0])
+
+        if last != 85200:
+
+           distance =  (85200-last)/600
+           for i in range(distance):
+             row_ = [last + (600*i), '']
+             after.append(row_)
+
+        group = begin + group + after
+
+
+    
+        print("Legth of group: " + str(group))
+        print("Imputation in progress...")
+
+
+      
+        data=pd.DataFrame(group, columns=['Timestamp','Waterlevel'])
+
+        data.loc[data['Waterlevel'] == '','Waterlevel'] = np.nan
+        data.insert(0, 'TimeframeId', range(0,len(data)))
+
+
+        data.to_csv('nan2.csv')
+        data = pd.read_csv("nan2.csv")
+        imputed = impute_knn(data)
+        group_of_groups.append(imputed)
+
+  return group_of_groups
+        
 
 
 
@@ -95,7 +171,7 @@ for i in range(0, len(df_list)):       # iterate through all indices
           for i in range(int(n_rows)-1):
              value_pre += 600
              rows_list.append(value_pre)
-             rows_list_wl.append('NaN')
+             rows_list_wl.append('')
 
 
 
@@ -103,7 +179,7 @@ all_rows = []
 matrix_tempo = []
 
 for i in range(0, len(rows_list)):
-    if rows_list_wl[i]=='NaN':
+    if rows_list_wl[i]=='':
        indeces.append(str(i))
     
     try:
@@ -143,36 +219,69 @@ for index in indeces:
 		break
 
 
-matrice  = []
-with open('nan.csv', 'w') as f:
-	for i in range(0, len(all_rows)):
-           string = str(all_rows[i])
 
-           row_ = all_rows[i].split(',')
+dataframes = grouped_range(all_rows)
+complete_df = pd.DataFrame(group, columns=['Timestamp','Waterlevel'])
+for data in dataframes:
+    complete_df.append(data)
 
-           try:
-              first_  = int(row_[0])
-              next_  = float(row_[-1])
-           except:
-           	  row1 = float('NaN')
-           	  row2 = float('NaN')
-           	  first_ = row1
-           	  next_ = row2
-
-           matrice.append([first_,next_])
-           f.write(string + '\n')
+count_row = complete_df.shape[0]
+print("After imputation: " + str(count_row))
+complete_df.to_csv('mandulog_imputed.csv')
 
 
 
-df = pd.DataFrame(matrice, columns=['TIME', 'WATERLEVEL'])
+
+   
+#    #print(str(group))
+   
+# group_sample = group_of_groups[0]
+# for group in group_sample:
+#    print str(group)
+#    time.sleep(2)
+# time.sleep(5)
 
 
-matrix_final = np.array(df)
-matrix_imputed = imputation_mean(matrix_final)
 
-df = pd.DataFrame(matrice, columns=['TIME', 'WATERLEVEL'])
 
-time_list = df['TIME'].tolist()
+
+
+
+
+
+# matrice  = []
+# with open('missing.csv', 'w') as f:
+# 	for i in range(0, len(all_rows)):
+#            string = str(all_rows[i])
+
+#            row_ = all_rows[i].split(',')
+
+#            try:
+#               first_  = int(row_[0])
+
+
+#               next_  = float(row_[-1])
+#            except:
+#            	  row1 = ''
+#            	  row2 = ''
+#            	  first_ = row1
+#            	  next_ = row2
+
+#            matrice.append([first_,next_])
+#            f.write(string + '\n')
+
+
+
+# df = pd.DataFrame(matrice, columns=['TIME', 'WATERLEVEL'])
+
+
+# matrix_final = np.array(df)
+# impute_knn(matrix_final)
+# matrix_imputed = imputation_mean(matrix_final)
+
+# df = pd.DataFrame(matrice, columns=['TIME', 'WATERLEVEL'])
+
+# time_list = df['TIME'].tolist()
 
 # new_list = []
 # for i in range(0, len(time_list)):
