@@ -9,9 +9,9 @@ import pprint
 import numpy as np
 import math
 from knn import impute_knn
-
+from mongodb import save_to_db
+import pymongo
 # def define_time(array_):
-
 
 
 
@@ -23,13 +23,16 @@ def time_to_value(value):
 
 
 def grouped_range(list_):
+
   group_of_groups = []
   group = []
   begin = []
   after = []
+  counter = 0
 
 
   for i in range(len(all_rows)):
+
       string = str(all_rows[i])
 
       row_ = all_rows[i].split(',')
@@ -51,50 +54,101 @@ def grouped_range(list_):
            row_[1] = float(row_[1])
            group.append(row_)
       else:
+        try:
+             #GET ORIGIN
+             origin = group[0]
+             origin = int(origin[0])
 
-        #GET ORIGIN
-        origin = group[0]
-        origin = int(origin[0])
-
-        if origin != 0:
-           distance = origin/600
-           for i in range(distance):
-             row_ = [600*i, '']
-             begin.append(row_)
-
-
-        #GET LAST
-        last = group[len(group)-1]
-        last = int(last[0])
-
-        if last != 85200:
-
-           distance =  (85200-last)/600
-           for i in range(distance):
-             row_ = [last + (600*i), '']
-             after.append(row_)
-
-        group = begin + group + after
+             if origin != 0:
+                distance = origin/600
+                for i in range(distance):
+                  row_ = [600*i, '']
+                  begin.append(row_)
 
 
-    
-        print("Legth of group: " + str(group))
-        print("Imputation in progress...")
+             #GET LAST
+             last = group[len(group)-1]
+             last = int(last[0])
+
+             if last != 85200:
+
+                distance =  (85200-last)/600
+                for i in range(distance):
+                  row_ = [last + (600*i), '']
+                  after.append(row_)
+
+             group = begin + group + after
 
 
-      
-        data=pd.DataFrame(group, columns=['Timestamp','Waterlevel'])
+         
+             #print("Legth of group: " + str(group))
+             counter += 1
+             print("Imputation in progress... " + str(counter))
 
-        data.loc[data['Waterlevel'] == '','Waterlevel'] = np.nan
-        data.insert(0, 'TimeframeId', range(0,len(data)))
 
 
-        data.to_csv('nan2.csv')
-        data = pd.read_csv("nan2.csv")
-        imputed = impute_knn(data)
-        group_of_groups.append(imputed)
+           
+             data=pd.DataFrame(group, columns=['Timestamp','Waterlevel'])
 
-  return group_of_groups
+             data.loc[data['Waterlevel'] == '','Waterlevel'] = np.nan
+             data.insert(0, 'TimeframeId', range(0,len(data)))
+
+
+             data.to_csv('nan2.csv')
+             data = pd.read_csv("nan2.csv")
+
+
+
+             value = impute_knn(data)
+             value = value['Waterlevel']
+
+       
+
+             data['Waterlevel'] = value
+             
+
+             filename = 'data' + str(counter) + '.csv'
+             data.to_csv(filename)
+
+
+             data.to_csv('mandulog_imputd.csv', mode="a", header=False)
+
+             csvfile = open(str(filename), 'r')
+             reader = csv.DictReader(csvfile)
+             myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+
+             db=myclient.forecasting
+             db.mandulog.drop()
+             header= ["Timestamp", "Waterlevel"]
+
+             for each in reader:
+                 row={}
+                 for field in header:
+                     row[field]=each[field]
+
+                 db.mandulog.insert(row)
+
+             group = []
+             after = []
+             begin = []
+             # try:
+             #    value = impute_knn(data)
+             #    print(str(value))
+                
+
+             # except MemoryError as e:
+
+             #         print "Memory Error, saving to csv for manual inspection"
+             #         df_ = pd.DataFrame([['----']])
+             #         data.append(df_)
+             #         data.to_csv('memorryerror.csv')
+        except Exception as e:
+          print(str(e))
+          file1 = open("errors.txt","a")
+          file1.write(str(e))
+          file1.close() 
+
+  print("Imputation Complete")
         
 
 
@@ -200,34 +254,28 @@ for i in range(0, len(rows_list)):
     except Exception as e:
         string = (str(rows_list[i])) + ',' + str(rows_list_wl[i])
         matrix_tempo.append([rows_list[i],float(rows_list_wl[i])])
-        all_rows.append(string)		
+        all_rows.append(string)                
 
 
 
 
 for index in indeces:
 
-	pre = int(index)-1
-	try:
-		#print "Before: " + str(all_rows[int(index)]) + '-' + str(all_rows[int(index)-1])
-		all_rows[int(index)], all_rows[pre] = all_rows[pre], all_rows[int(index)]
-		#print "After: " + str(all_rows[int(index)]) + '-' + str(all_rows[int(index)-1])
+        pre = int(index)-1
+        try:
+                #print "Before: " + str(all_rows[int(index)]) + '-' + str(all_rows[int(index)-1])
+                all_rows[int(index)], all_rows[pre] = all_rows[pre], all_rows[int(index)]
+                #print "After: " + str(all_rows[int(index)]) + '-' + str(all_rows[int(index)-1])
 
 
-	except Exception as e:
-		print str(e)
-		break
+        except Exception as e:
+                print str(e)
+                break
 
 
 
-dataframes = grouped_range(all_rows)
-complete_df = pd.DataFrame(group, columns=['Timestamp','Waterlevel'])
-for data in dataframes:
-    complete_df.append(data)
+grouped_range(all_rows)
 
-count_row = complete_df.shape[0]
-print("After imputation: " + str(count_row))
-complete_df.to_csv('mandulog_imputed.csv')
 
 
 
@@ -251,7 +299,7 @@ complete_df.to_csv('mandulog_imputed.csv')
 
 # matrice  = []
 # with open('missing.csv', 'w') as f:
-# 	for i in range(0, len(all_rows)):
+#         for i in range(0, len(all_rows)):
 #            string = str(all_rows[i])
 
 #            row_ = all_rows[i].split(',')
@@ -262,10 +310,10 @@ complete_df.to_csv('mandulog_imputed.csv')
 
 #               next_  = float(row_[-1])
 #            except:
-#            	  row1 = ''
-#            	  row2 = ''
-#            	  first_ = row1
-#            	  next_ = row2
+#                      row1 = ''
+#                      row2 = ''
+#                      first_ = row1
+#                      next_ = row2
 
 #            matrice.append([first_,next_])
 #            f.write(string + '\n')
