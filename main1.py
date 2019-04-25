@@ -8,7 +8,7 @@ import csv
 import pprint
 import numpy as np
 import math
-from knn import impute_knn
+from knn1 import impute_knn
 from mongodb import save_to_db
 import pymongo
 # def define_time(array_):
@@ -17,7 +17,7 @@ import pymongo
 
 def time_to_value(value):
   timestr = value
-  ftr = [3600,60,1]
+  ftr = [3900,60,1]
   converted = sum([a*b for a,b in zip(ftr, map(int,timestr.split(':')))])
   return converted
 
@@ -60,9 +60,9 @@ def grouped_range(list_):
              origin = int(origin[0])
 
              if origin != 0:
-                distance = origin/600
+                distance = origin/900
                 for i in range(distance):
-                  row_ = [600*i, '']
+                  row_ = [900*i, '']
                   begin.append(row_)
 
 
@@ -72,9 +72,9 @@ def grouped_range(list_):
 
              if last != 85200:
 
-                distance =  (85200-last)/600
+                distance =  (85200-last)/900
                 for i in range(distance):
-                  row_ = [last + (600*i), '']
+                  row_ = [last + (900*i), '']
                   after.append(row_)
 
              group = begin + group + after
@@ -88,9 +88,9 @@ def grouped_range(list_):
 
 
            
-             data=pd.DataFrame(group, columns=['Timestamp','Waterlevel'])
+             data=pd.DataFrame(group, columns=['Timestamp','Rainfall'])
 
-             data.loc[data['Waterlevel'] == '','Waterlevel'] = np.nan
+             data.loc[data['Rainfall'] == '','Rainfall'] = np.nan
              data.insert(0, 'TimeframeId', range(0,len(data)))
 
 
@@ -100,33 +100,33 @@ def grouped_range(list_):
 
 
              value = impute_knn(data)
-             value = value['Waterlevel']
+             value = value['Rainfall']
 
        
 
-             data['Waterlevel'] = value
+             data['Rainfall'] = value
              
 
-             filename = 'data' + str(counter) + '.csv'
-             data.to_csv(filename)
+             filename = 'datarainpol' + str(counter) + '.csv'
+             #data.to_csv(filename)
 
 
-             data.to_csv('mandulog_imputd.csv', mode="a", header=False)
+             data.to_csv('dgkilaan_imputd.csv', mode="a", header=False)
 
-             csvfile = open(str(filename), 'r')
-             reader = csv.DictReader(csvfile)
-             myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+             # csvfile = open(str(filename), 'r')
+             # reader = csv.DictReader(csvfile)
+             # myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 
-             db=myclient.forecasting
-             db.mandulog.drop()
-             header= ["Timestamp", "Waterlevel"]
+             # db=myclient.forecasting
+             # db.mandulog.drop()
+             # header= ["Timestamp", "Waterlevel"]
 
-             for each in reader:
-                 row={}
-                 for field in header:
-                     row[field]=each[field]
+             # for each in reader:
+             #     row={}
+             #     for field in header:
+             #         row[field]=each[field]
 
-                 db.mandulog.insert(row)
+             #     db.mandulog.insert(row)
 
              group = []
              after = []
@@ -153,13 +153,13 @@ def grouped_range(list_):
 
 
 #BEGIN
-data = pd.read_csv("Mandulog.csv") #Ibala diri ang csv
+data = pd.read_csv("Digkilaan.csv") #Ibala diri ang csv
 
 
 
 # Preview the first 5 lines of the loaded data 
 df_list = data['TIME'].tolist()
-df_list_wl = data['WATERLEVEL'].tolist()
+df_list_wl = data['RAINFALL'].tolist()
 
 length_list = len(df_list)
 print "Before imputation: " + str(length_list)
@@ -206,7 +206,7 @@ for i in range(0, len(df_list)):       # iterate through all indices
     in_between = value_x - value_pre
 
     #TODO Post-Pre/10 = n-rows to be imputed within to put 'NaN'
-    n_rows = in_between/600
+    n_rows = in_between/900
 
     if (len(str(value_pre)) == 2 and len(str(value_x)) == 5) or (len(str(value_x)) == 2 and len(str(value_pre)) == 5):
         continue
@@ -217,7 +217,7 @@ for i in range(0, len(df_list)):       # iterate through all indices
 
 
  
-        if in_between == 600:
+        if in_between == 900:
           accepted.append({value_pre, value_x}) 
         elif in_between < 0:
           odd.append({value_pre, value_x, in_between})
@@ -226,7 +226,7 @@ for i in range(0, len(df_list)):       # iterate through all indices
           #Declare blanks as NaN -- Toinclude n_rows
           
           for i in range(int(n_rows)-1):
-             value_pre += 600
+             value_pre += 900
              rows_list.append(value_pre)
              rows_list_wl.append('')
 
@@ -337,7 +337,7 @@ grouped_range(all_rows)
 # new_list = []
 # for i in range(0, len(time_list)):
 #     if math.isnan(time_list[i]):
-#        time_ = time_list[i-1] + 600
+#        time_ = time_list[i-1] + 900
 #        time_list[i] = time_
 #        new_list.append(time_list[i])
 #     else:

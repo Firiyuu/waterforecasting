@@ -214,7 +214,7 @@ def knn_impute(target, attributes, k_neighbors, aggregation_method="mean", numer
 def impute_knn(df):
 
 
-    value = knn_impute(target=df['Waterlevel'], attributes=df.drop(['Timestamp','Waterlevel'], 1),
+    value = knn_impute(target=df['Rainfall'], attributes=df.drop(['Timestamp','Rainfall'], 1),
                                             aggregation_method="median", k_neighbors=100, numeric_distance='euclidean',
                                             categorical_distance='hamming', missing_neighbors_threshold=1)
 
