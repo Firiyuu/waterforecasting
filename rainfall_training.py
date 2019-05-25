@@ -2,13 +2,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import datetime as dt
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
-
+from sklearn.preprocessing  import Normalizer
 #TRAIN
 rainfall = pd.read_csv('Digkilaan_interpol.csv')
 rainfall.columns = ['DATETIME','RAINFALL']
-rainfall['RAINFALL'] = rainfall['RAINFALL']*10
+rainfall['RAINFALL'] = rainfall['RAINFALL']
 rainfall['DATETIME'] = pd.to_datetime(rainfall['DATETIME'])
 rainfall['DATETIME'] = (rainfall['DATETIME'] - rainfall['DATETIME'].min())  / np.timedelta64(1,'D')
 
@@ -45,13 +46,33 @@ plt.show()
 
 
 
-#INPUT
+# #INPUT WATERLEVEL
 waterlevel = pd.read_csv('Mandulog_interpol.csv')
 waterlevel.columns = ['DATETIME','WATERLEVEL']
-waterlevel['WATERLEVEL'].interpolate(method='linear', limit_direction ='backward', inplace=True)
+waterlevel['WATERLEVEL'].interpolate(method='linear', inplace=True)
 waterlevel['DATETIME'] = pd.to_datetime(waterlevel['DATETIME'])
-waterlevel['DATETIME'] = (waterlevel['DATETIME'] - waterlevel['DATETIME'].min())  / np.timedelta64(1,'D')
-predictions = lm.predict(waterlevel)
+waterlevel['WATERLEVEL'] = waterlevel['WATERLEVEL']*1000
+waterlevel.to_csv('Mandulog_imputed.csv')
 
-waterlevel['PREDICTIONS'] = predictions
-waterlevel.to_csv('Mandulog_predicted.csv')
+
+
+#INPUT RAINFALL
+rainfall = pd.read_csv('Digkilaan_interpol.csv')
+rainfall.columns = ['DATETIME','RAINFALL']
+rainfall['RAINFALL'].interpolate(method='linear', inplace=True)
+rainfall['DATETIME'] = pd.to_datetime(rainfall['DATETIME'])
+rainfall['RAINFALL'] = rainfall['RAINFALL']
+rainfall.to_csv('Digkilaan_imputed.csv')
+
+#MERGING
+
+
+# #separate array into input and output components
+# scaler = Normalizer().fit(merged_df)
+# normalizedX = scaler.transform(merged_df)
+
+
+
+# predictions = lm.predict(merged_df)
+# merged_df['PREDICTIONS'] = predictions
+# merged_df.to_csv('predicted.csv')

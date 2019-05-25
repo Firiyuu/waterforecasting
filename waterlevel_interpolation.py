@@ -9,7 +9,9 @@ series['date_and_time'] = series['YEAR'].map(str) + '-'+ series['MONTH'].map(str
 
 
 date_and_time = series['date_and_time'].to_list()
-waterlevel = series['WATERLEVEL'].to_list()
+waterlevel = series['WATERLEVEL']*1000
+waterlevel = waterlevel.to_list()
+
 
 
 
@@ -22,7 +24,10 @@ ts = ts.resample('10T').mean()
 
 ts.interpolate(method='spline', order=3).plot()
 ts.interpolate(method='time').plot()
+ts.interpolate(method='linear', inplace=True)
+
 print(str(ts))
+ts.columns = ['DATETIME', 'WATERLEVEL']
 ts.to_csv('Mandulog_interpol.csv')
 lines, labels = plt.gca().get_legend_handles_labels()
 labels = ['spline', 'time']

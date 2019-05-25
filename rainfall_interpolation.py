@@ -10,7 +10,7 @@ series['date_and_time'] = series['YEAR'].map(str) + '-'+ series['MONTH'].map(str
 
 date_and_time = series['date_and_time'].to_list()
 rainfall = series['RAINFALL']
-waterlevel = rainfall*10
+waterlevel = rainfall
 waterlevel = waterlevel.to_list()
 
 values = waterlevel
@@ -21,9 +21,15 @@ ts = ts.resample('15T').mean()
 
 ts.interpolate(method='spline', order=3).plot()
 ts.interpolate(method='time').plot()
+ts.interpolate(method='linear', inplace=True)
+
+
 print(str(ts))
+ts.columns = ['DATETIME', 'RAINFALL']
 ts.to_csv('Digkilaan_interpol.csv')
 lines, labels = plt.gca().get_legend_handles_labels()
 labels = ['spline', 'time']
 plt.legend(lines, labels, loc='best')
 plt.show()
+
+
