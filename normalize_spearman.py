@@ -1,4 +1,7 @@
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import GridSearchCV
+from sklearn import svm, datasets
+from sklearn.metrics import mean_squared_error
 import pandas as pd
 import numpy as np
 from scipy.stats import spearmanr
@@ -6,8 +9,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
-
+from math import sqrt
 #NORMALIZATION
+
+def mean_absolute_percentage_error(y_true, y_pred): 
+    y_true, y_pred = np.array(y_true), np.array(y_pred)
+    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
 series = pd.read_csv('merged_imputation.csv')
 series['DATETIME'] = pd.to_datetime(series['DATETIME'])
@@ -55,3 +62,47 @@ plt.show()
 predictions = lm.predict(series)
 series['PREDICTIONS'] = predictions
 series.to_csv('spearman_predict.csv')
+
+
+series.to_csv('pearson_predict.csv')
+
+X = series[['WATERLEVEL', 'RAINFALL']]
+y = series['WATERLEVEL']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=101)
+
+
+
+
+#GRID SEARCH CROSS VALIDATION
+parameters = [{'kernel': ['rbf'], 'gamma': [1e-2, 1e-3, 1e-4, 1e-5],
+                     'C': [0.001, 0.10, 0.1, 10, 25, 50, 100, 1000]},
+                    {'kernel': ['sigmoid'], 'gamma': [1e-2, 1e-3, 1e-4, 1e-5],
+                     'C': [0.001, 0.10, 0.1, 10, 25, 50, 100, 1000]},
+                    {'kernel': ['poly'], 'C': [0.001, 0.10, 0.1, 10, 25, 50, 100, 1000]}
+                   ]
+
+svc = svm.SVC(gamma="scale")
+clf = GridSearchCV(svc, parameters, cv=5)
+fitted = clf.fit(X_train.astype('int'), y_train.astype('int'))
+print(fitted)
+
+
+print("\nBest parameters set found on development set:\n")
+print(clf.best_params_)
+print("Grid scores on development set:")
+means = clf.cv_results_['mean_test_score']
+stds = clf.cv_results_['std_test_score']
+for mean, std, params in zip(means, stds, clf.cv_results_['params']):
+    print("%0.3f (+/-%0.03f) for %r"
+          % (mean, std * 2, params))\
+
+#VALIDATE VIA RMSE
+predictions = clf.predict(X_test)
+print(predictions)
+rms = sqrt(mean_squared_error(y_test, predictions))
+print("\n\nRMSE Accuracy score: " + str(rms))
+
+
+mape = mean_absolute_percentage_error(y_test, predictions)
+print("\n\nMAPE Accuracy score: " + str(mape))
