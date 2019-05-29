@@ -8,10 +8,10 @@ series = pd.read_csv('Digkilaan_trimmed.csv')
 series['date_and_time'] = series['YEAR'].map(str) + '-'+ series['MONTH'].map(str) + '-'+ series['DAY'].map(str) + ' ' + series['TIME'].map(str)
 
 
-date_and_time = series['date_and_time'].to_list()
+date_and_time = series['date_and_time'].tolist()
 rainfall = series['RAINFALL']
 waterlevel = rainfall
-waterlevel = waterlevel.to_list()
+waterlevel = waterlevel.tolist()
 
 values = waterlevel
 timestamps = pd.to_datetime(date_and_time)

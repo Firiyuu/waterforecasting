@@ -16,7 +16,7 @@ def mean_absolute_percentage_error(y_true, y_pred):
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
-series = pd.read_csv('merged_imputation.csv')
+series = pd.read_csv('merged_imputation_f.csv')
 series['DATETIME'] = pd.to_datetime(series['DATETIME'])
 series['DATETIME'] = pd.to_datetime(series['DATETIME'])
 series['DATETIME'] = (series['DATETIME'] - series['DATETIME'].min())  / np.timedelta64(1,'D')
@@ -24,26 +24,33 @@ series['DATETIME'] = (series['DATETIME'] - series['DATETIME'].min())  / np.timed
 scaler = MinMaxScaler()
 scaler.fit(series)
 series = scaler.transform(series)
-series = pd.DataFrame(series, columns=['DATETIME', 'RAINFALL', 'WATERLEVEL'])
+series = pd.DataFrame(series, columns=['DATETIME', 'WATERLEVEL', 'RF_DIGKILAAN', 'RF_ROGONGON'])
+series = series[['WATERLEVEL', 'RF_DIGKILAAN','RF_ROGONGON','DATETIME']]
 print("Normalized: ")
 print(series)
-series.to_csv('merge_normalized.csv')
+# series.to_csv('merge_normalized_ff.csv')
 #P-value gives us the probability of finding an observation under an assumption that a particular hypothesis is true.
 #This probability is used to accept or reject that hypothesis.
 
 #Correlation is a statistical term which in common usage refers 
 #to how close two variables are to having a linear relationship with each other.
 print("-----------------\nFeature Selection: Spearman\n")
-corr, p_value = spearmanr(series['WATERLEVEL'] , series['RAINFALL'] )
+corr, p_value = spearmanr(series)
 print("Correlation: " + str(corr))
 print("P Value: " + str(p_value))
+print(series)
 
-
+#Using Pearson Correlation
+print("-----------------\nFeature Selection: Pearson\n")
+plt.figure(figsize=(12,10))
+cor = series.corr()
+sns.heatmap(cor, annot=True, cmap=plt.cm.Reds)
+plt.show()
 
 
 
 #PREDICTION
-X = series[['DATETIME','RAINFALL','WATERLEVEL']]
+X = series[['DATETIME', 'WATERLEVEL', 'RF_DIGKILAAN', 'RF_ROGONGON']]
 y = series['WATERLEVEL']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=101)
@@ -61,12 +68,11 @@ plt.show()
 
 predictions = lm.predict(series)
 series['PREDICTIONS'] = predictions
-series.to_csv('spearman_predict.csv')
+series.to_csv('spearman_predict_f.csv')
 
 
-series.to_csv('pearson_predict.csv')
 
-X = series[['WATERLEVEL', 'RAINFALL']]
+X = series[['DATETIME', 'WATERLEVEL', 'RF_DIGKILAAN', 'RF_ROGONGON']]
 y = series['WATERLEVEL']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=101)
@@ -104,5 +110,3 @@ rms = sqrt(mean_squared_error(y_test, predictions))
 print("\n\nRMSE Accuracy score: " + str(rms))
 
 
-mape = mean_absolute_percentage_error(y_test, predictions)
-print("\n\nMAPE Accuracy score: " + str(mape))

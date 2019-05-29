@@ -5,18 +5,18 @@ def parser(x):
 	return datetime.strptime(x, '%Y-%m')
 
 
-csv_name = 'Mandulog_trimmed.csv'
+csv_name = 'Rogongon_trimmed.csv'
  
 series = read_csv(csv_name)
 series['date_and_time'] = series['YEAR'].map(str) + '-'+ series['MONTH'].map(str) + '-'+ series['DAY'].map(str) + ' ' + series['TIME'].map(str)
 
 
-date_and_time = series['date_and_time'].to_list()
-waterlevel = series['WATERLEVEL'].to_list()
+date_and_time = series['date_and_time']
+RAINFALL = series['RAINFALL']
 
-new_dataset = series[['date_and_time','WATERLEVEL']]
+new_dataset = series[['date_and_time','RAINFALL']]
 
-new_name = 'processed.csv'
+new_name = 'processed_rogongon.csv'
 new_dataset.to_csv(new_name)
 
 

@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 series = pd.read_csv('merged.csv')
 
 
-date_and_time = series['DATETIME'].to_list()
+date_and_time = series['DATETTIME'].tolist()
 
-rainfall = series['WATERLEVEL']*1000
+rainfall = series['RAINFALL_ROGONGON']*1000
 waterlevel = rainfall
-waterlevel = waterlevel.to_list()
+waterlevel = waterlevel.tolist()
 
 values = waterlevel
 timestamps = pd.to_datetime(date_and_time)
@@ -26,7 +26,7 @@ ts.interpolate(method='linear', inplace=True)
 
 print(str(ts))
 ts.columns = ['DATETIME', 'WATERLEVEL', 'RAINFALL']
-ts.to_csv('merged_imputation1.csv')
+ts.to_csv('merged_imputation3.csv')
 
 
 
