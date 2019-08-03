@@ -205,7 +205,15 @@ def predict(series):
 	#VALIDATE VIA RMSE
 	predictions = clf.predict(X_test)
 	print(predictions)
+	y_test = y_test*3.5
 	rms = sqrt(mean_squared_error(y_test, predictions))
+	mape = mean_absolute_percentage_error(y_test, predictions)
 	print("\n\nRMSE Accuracy score: " + str(rms))
+	print("\n\nMAPE Accuracy score: " + str(mape))
+	plt.plot(y_test)
+	plt.plot(predictions)
+	plt.legend(["true", "pred"])
+	plt.show()
+
 
 	return predictions
