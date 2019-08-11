@@ -89,7 +89,7 @@ def analyze(series):
 
 	series = series.drop(columns="DATETIME")
 	series = series.drop(columns="MONTH")
-	series = series.drop(columns="YEAR")
+	# series = series.drop(columns="YEAR")
 	series = series.drop(columns="DATE")
 
 	print(series.head())
@@ -97,7 +97,7 @@ def analyze(series):
 	scaler = MinMaxScaler()
 	scaler.fit(series)
 	series = scaler.transform(series)
-	series = pd.DataFrame(series, columns=['WATERLVEL','RF_DIGKILAAN','RF_ROGONGON','W1','R1','D1','W2','R2','D2','W3','R3','D3','DAY', 'TIME'])
+	series = pd.DataFrame(series, columns=['WATERLVEL','RF_DIGKILAAN','RF_ROGONGON','W1','R1','D1','W2','R2','D2','W3','R3','D3','DAY', 'TIME','YEAR'])
 	print(series.head())
 
 	return series
@@ -122,14 +122,14 @@ def train(series, series1):
 	print("---------- Transformed")
 	print(series)
 
-	series = pd.DataFrame(series, columns=['WATERLVEL','RF_DIGKILAAN','RF_ROGONGON','W1','R1','D1','W2','R2','D2','W3','R3','D3','DAY', 'TIME'])
+	series = pd.DataFrame(series, columns=['WATERLVEL','RF_DIGKILAAN','RF_ROGONGON','W1','R1','D1','W2','R2','D2','W3','R3','D3','DAY', 'TIME','YEAR'])
 
 
 	print("---------- New Dataframe")
 	print(series)
 
 
-	series = series[['WATERLVEL','RF_DIGKILAAN','RF_ROGONGON','W1','R1','D1','W2','R2','D2','W3','R3','D3','DAY', 'TIME']]
+	series = series[['WATERLVEL','RF_DIGKILAAN','RF_ROGONGON','W1','R1','D1','W2','R2','D2','W3','R3','D3','DAY', 'TIME','YEAR']]
 	print("Normalized: ")
 	print(series)
 
@@ -162,7 +162,7 @@ def predict(series):
 	#PREDICTION
 	print(series.head())
 
-	X = series[['WATERLVEL','RF_DIGKILAAN','RF_ROGONGON','W1','R1','D1','W2','R2','D2','W3','R3','D3','DAY', 'TIME']]
+	X = series[['WATERLVEL','RF_DIGKILAAN','RF_ROGONGON','W1','R1','D1','W2','R2','D2','W3','R3','D3','DAY', 'TIME','YEAR']]
 	y = series[['WATERLVEL']]
 
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=101)
@@ -182,7 +182,7 @@ def predict(series):
 
 
 
-	X = series[['WATERLVEL','RF_DIGKILAAN','RF_ROGONGON','W1','R1','D1','W2','R2','D2','W3','R3','D3','DAY', 'TIME']]
+	X = series[['WATERLVEL','RF_DIGKILAAN','RF_ROGONGON','W1','R1','D1','W2','R2','D2','W3','R3','D3','DAY', 'TIME','YEAR']]
 	y = series[['WATERLVEL']]
 
 
