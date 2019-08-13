@@ -142,8 +142,7 @@ def train(series):
 	print("P Value: " + str(p_value))
 	print(series)
 
-	#Using Pearson Correlation
-	print("-----------------\nFeature Selection: Pearson\n")
+
 	plt.figure(figsize=(12,10))
 	cor = series.corr()
 	sns.heatmap(cor, annot=True, cmap=plt.cm.Reds)
@@ -188,7 +187,7 @@ def predict(series):
 	parameters = {'kernel': ('linear', 'rbf','poly'), 'C':[1.5, 10],'gamma': [1e-7, 1e-4],'epsilon':[0.1,0.2,0.5,0.3]}
 
 	svc = svm.SVR()
-	clf = GridSearchCV(svc, parameters, cv=2)
+	clf = GridSearchCV(svc, parameters, cv=10)
 	fitted = clf.fit(X_train.astype('int'), y_train.astype('int'))
 	print(fitted)
 
@@ -209,6 +208,9 @@ def predict(series):
 	rms = sqrt(mean_squared_error(y_test, predictions))
 	mape = mean_absolute_percentage_error(y_test, predictions)
 	print("\n\nRMSE Accuracy score: " + str(rms))
+
+	mape = mean_absolute_percentage_error(y_test, predictions)
+
 	print("\n\nMAPE Accuracy score: " + str(mape))
 	plt.plot(y_test)
 	plt.plot(predictions)
