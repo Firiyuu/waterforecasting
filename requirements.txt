@@ -14,7 +14,7 @@ backports.shutil-which==3.5.2
 backports.ssl-match-hostname==3.5.0.1
 beautifulsoup4==4.6.3
 bitarray==0.8.3
-bleach==3.1.0
+bleach==3.1.2
 blinker==1.4
 brotlipy==0.6.0
 bs4==0.0.1
