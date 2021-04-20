@@ -119,7 +119,7 @@ probableparsing==0.0.1
 prometheus-client==0.6.0
 prompt-toolkit==1.0.16
 psycopg2==2.7.5
-py==1.7.0
+py==1.10.0
 pyap==0.1.0
 pyasn1==0.1.9
 pyasn1-modules==0.2.2
