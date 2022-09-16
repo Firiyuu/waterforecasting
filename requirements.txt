@@ -86,7 +86,7 @@ kivy.deps.gstreamer==0.1.13
 kivy.deps.sdl2==0.1.18
 kiwisolver==1.1.0
 lxml==3.6.0
-Mako==1.0.7
+Mako==1.2.2
 MarkupSafe==1.0
 matplotlib==2.2.4
 mistune==0.8.4
